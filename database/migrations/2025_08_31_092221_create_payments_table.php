@@ -12,9 +12,9 @@ return new class extends Migration {
     {
         Schema::create('payments', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('company_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('party_id')->nullable()->constrained()->cascadeOnDelete();
-            $table->foreignId('invoice_id')->nullable()->constrained()->cascadeOnDelete();
+            $table->foreignId('company_id');
+            $table->foreignId('party_id')->nullable();
+            $table->foreignId('invoice_id')->nullable();
             $table->decimal('amount', 12, 2);
             $table->date('date');
             $table->enum('method', ['cash', 'upi', 'card', 'bank']);

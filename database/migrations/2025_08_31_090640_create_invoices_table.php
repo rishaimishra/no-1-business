@@ -12,10 +12,10 @@ return new class extends Migration {
     {
         Schema::create('invoices', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('company_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('company_id');
             $table->string('invoice_no');
             $table->date('date');
-            $table->foreignId('party_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('party_id');
             $table->string('place_of_supply_state', 2)->nullable();
             $table->decimal('subtotal', 12, 2)->default(0);
             $table->decimal('tax_total', 12, 2)->default(0);

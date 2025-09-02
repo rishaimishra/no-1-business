@@ -17,10 +17,10 @@ return new class extends Migration {
             $table->string('gstin')->nullable();
             $table->string('state_code', 2)->nullable();
             $table->text('address')->nullable();
-            $table->foreignId('owner_id')->nullable()->constrained('users');
+            $table->foreignId('owner_id')->nullable();
             $table->string('billing_email')->nullable();
             $table->string('whatsapp_number')->nullable();
-            $table->foreignId('plan_id')->nullable()->constrained();
+            $table->foreignId('plan_id')->nullable();
             $table->timestamps();
         });
     }

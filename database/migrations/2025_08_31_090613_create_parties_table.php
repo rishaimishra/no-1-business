@@ -12,7 +12,7 @@ return new class extends Migration {
     {
         Schema::create('parties', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('company_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('company_id');
             $table->enum('type', ['customer', 'supplier']);
             $table->string('name');
             $table->string('phone')->nullable();

@@ -12,8 +12,8 @@ return new class extends Migration {
     {
         Schema::create('subscriptions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('company_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('plan_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('company_id');
+            $table->foreignId('plan_id');
             $table->enum('gateway', ['razorpay', 'stripe']);
             $table->string('status')->default('pending');
             $table->timestamp('current_period_end')->nullable();
