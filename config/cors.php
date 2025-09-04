@@ -19,7 +19,11 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['http://localhost:3000'],
+     'allowed_origins' => [
+        'http://localhost:5173', // Your local development
+        'https://your-react-domain.com', // Your React app domain
+        'https://vyapar.srvtechservices.com' // Your Laravel domain
+    ],
 
     'allowed_origins_patterns' => [],
 
