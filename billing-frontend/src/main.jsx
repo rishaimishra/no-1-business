@@ -3,32 +3,31 @@ import ReactDOM from "react-dom/client";
 import {
   createBrowserRouter,
   RouterProvider,
+  Navigate,
 } from "react-router-dom";
-import App from "./App";
-import LoginPage from "./pages/Login";
-import ProductsPage from "./pages/Products";
+import Login from "./pages/Login";
+import Products from "./pages/Products";
 
-const router = createBrowserRouter(
-  [
-    {
-      path: "/login",
-      element: <LoginPage />,
-    },
-    {
-      path: "/*",
-      element: <App />,
-    },
-    {
-      path: "/products",
-      element: <ProductsPage />,
-    }
-  ],
+const router = createBrowserRouter([
   {
-    future: {
-      v7_startTransition: true,  // ✅ future flag enable
-    },
-  }
-);
+    path: "/login",
+    element: <Login />,
+  },
+  {
+    path: "/products",
+    element: <ProtectedRoute><Products /></ProtectedRoute>,
+  },
+  {
+    path: "*",
+    element: <Navigate to="/products" replace />,
+  },
+]);
+
+// Protected route component
+function ProtectedRoute({ children }) {
+  const token = localStorage.getItem("token");
+  return token ? children : <Navigate to="/login" replace />;
+}
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>

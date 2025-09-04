@@ -17,7 +17,14 @@ export default function Products({ setToken }) {
       const res = await API.get("/products");
       setProducts(res.data);
     } catch (err) {
-      setError("Failed to fetch products. Please try again.");
+      if (err.response?.status === 401) {
+        // Token expired or invalid
+        localStorage.removeItem("token");
+        if (setToken) setToken(null);
+        navigate("/login");
+      } else {
+        setError("Failed to fetch products. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
@@ -35,13 +42,22 @@ export default function Products({ setToken }) {
       setSalePrice("");
       fetchProducts();
     } catch (err) {
-      setError("Error adding product.");
+      if (err.response?.status === 401) {
+        localStorage.removeItem("token");
+        if (setToken) setToken(null);
+        navigate("/login");
+      } else {
+        setError("Error adding product.");
+      }
     }
   };
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-    setToken(null);
+    // Only call setToken if it's provided
+    if (setToken && typeof setToken === 'function') {
+      setToken(null);
+    }
     navigate("/login");
   };
 
@@ -73,6 +89,7 @@ export default function Products({ setToken }) {
         />
         <input
           placeholder="Sale Price"
+          type="number"
           className="border p-2 rounded-lg w-32 focus:outline-blue-500"
           value={salePrice}
           onChange={(e) => setSalePrice(e.target.value)}
