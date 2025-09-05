@@ -7,6 +7,8 @@ import {
 } from "react-router-dom";
 import Login from "./pages/Login";
 import Products from "./pages/Products";
+import "./index.css";
+
 
 const router = createBrowserRouter([
   {
