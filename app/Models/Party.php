@@ -30,10 +30,10 @@ class Party extends Model
         return $this->hasMany(Payment::class);
     }
 
-    // public function getBalanceAttribute(): float
-    // {
-    //     $invoiceTotal = $this->invoices()->sum('grand_total');
-    //     $paymentTotal = $this->payments()->sum('amount');
-    //     return $invoiceTotal - $paymentTotal + $this->opening_balance;
-    // }
+    public function getBalanceAttribute(): float
+    {
+        $invoiceTotal = $this->invoices()->sum('grand_total');
+        $paymentTotal = $this->payments()->sum('amount');
+        return $invoiceTotal - $paymentTotal + $this->opening_balance;
+    }
 }
