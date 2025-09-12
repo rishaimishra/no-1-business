@@ -10,6 +10,9 @@ use App\Http\Controllers\ProductController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+Route::get('/tax-rates', function () {
+    return \App\Models\TaxRate::all();
+});
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
@@ -18,6 +21,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('invoices', InvoiceController::class);
     Route::apiResource('parties', PartyController::class);
     Route::apiResource('payments', PaymentController::class);
+
+
 
 
 

@@ -9,7 +9,7 @@ class PartyController extends Controller
 {
     public function index()
     {
-        $company = app('company') ?? auth()->user()->company;
+        $company = auth()->user()->company;
 
         $parties = Party::where('company_id', $company->id)
             ->latest()
@@ -20,7 +20,7 @@ class PartyController extends Controller
 
     public function store(Request $request)
     {
-        $company = app('company') ?? auth()->user()->company;
+        $company = auth()->user()->company;
 
         $data = $request->validate([
             'type' => 'required|in:customer,supplier',
@@ -80,7 +80,7 @@ class PartyController extends Controller
 
     protected function authorizeCompany(Party $party)
     {
-        $company = app('company') ?? auth()->user()->company;
+        $company = auth()->user()->company;
 
         if ($party->company_id !== $company->id) {
             abort(403, 'Unauthorized');

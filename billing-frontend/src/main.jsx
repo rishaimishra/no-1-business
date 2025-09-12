@@ -10,6 +10,8 @@ import "./index.css";
 import Login from "./pages/Login";
 import Products from "./pages/Products";
 import InvoiceList from "./pages/InvoiceList";
+import InvoiceCreate from "./pages/InvoiceCreate";
+
 import PaymentList from "./pages/PaymentList"; // future
 import Layout from "./components/Layout";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -26,6 +28,7 @@ const router = createBrowserRouter([
     children: [
       { path: "products", element: <Products /> },
       { path: "invoices", element: <InvoiceList /> },
+      { path: "invoices/create", element: <InvoiceCreate /> },
       { path: "payments", element: <PaymentList /> }, // future
       { path: "*", element: <Navigate to="/products" replace /> },
     ],

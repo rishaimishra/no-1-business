@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreInvoiceRequest;
 use App\Http\Requests\UpdateInvoiceRequest;
 use App\Models\Invoice;
+use App\Models\InvoiceItem;
 use App\Models\Party;
 use App\Models\Product;
 use App\Models\StockMovement;
+use App\Models\TaxRate;
 use App\Support\Gst;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -36,28 +38,91 @@ class InvoiceController extends Controller
      * POST /api/invoices
      * नया invoice create
      */
-    public function store(StoreInvoiceRequest $req)
+    public function store(StoreInvoiceRequest $request)
     {
-        $invoice = null;
+        $company = auth()->user()->company;
 
-        DB::transaction(function () use ($req, &$invoice) {
-            $company = auth()->user()->company;   // ✅ yahi sahi hai
-            $party = Party::findOrFail($req->party_id);
+        return DB::transaction(function () use ($request, $company) {
+            $subtotal = 0;
+            $taxTotal = 0;
+            $grandTotal = 0;
 
+            // invoice create (empty totals for now)
             $invoice = Invoice::create([
                 'company_id' => $company->id,
+                'party_id' => $request->party_id,
+                'date' => $request->date,
                 'invoice_no' => Invoice::nextNumber($company->id),
-                'date' => $req->date,
-                'party_id' => $party->id,
-                'place_of_supply_state' => $party->state_code ?? $company->state_code,
-                'status' => 'issued',
-                'payment_status' => 'unpaid'
+                'place_of_supply_state' => $request->place_of_supply_state,
+                'subtotal' => 0,
+                'tax_total' => 0,
+                'grand_total' => 0,
+                'status' => 'draft',
+                'payment_status' => 'unpaid',
             ]);
 
-        });
+            foreach ($request->items as $item) {
+                $lineSubtotal = $item['qty'] * $item['unit_price'];
 
-        return response()->json($invoice->load('items', 'party'), 201);
+                // discount
+                $discount = ($item['discount_percent'] ?? 0) / 100 * $lineSubtotal;
+                $lineSubtotal -= $discount;
+
+                // --- GST logic ---
+                $cgst = 0;
+                $sgst = 0;
+                $igst = 0;
+
+                // agar place_of_supply_state == company_state → CGST+SGST
+                if ($request->place_of_supply_state == $company->state_code) {
+                    $cgst = ($item['tax_percent'] ?? 0) / 2 / 100 * $lineSubtotal;
+                    $sgst = ($item['tax_percent'] ?? 0) / 2 / 100 * $lineSubtotal;
+                } else {
+                    $igst = ($item['tax_percent'] ?? 0) / 100 * $lineSubtotal;
+                }
+
+                $lineTotal = $lineSubtotal + $cgst + $sgst + $igst;
+
+                // totals update
+                $subtotal += $lineSubtotal;
+                $taxTotal += ($cgst + $sgst + $igst);
+                $grandTotal += $lineTotal;
+                $taxRate = TaxRate::find((int) $item['tax_rate_id']);
+
+
+                if (!$taxRate) {
+                    return response()->json(['error' => 'Invalid Tax Rate selected.'], 422);
+                }
+                
+                $taxPercent = $taxRate->rate;
+
+                // save item
+                InvoiceItem::create([
+                    'invoice_id' => $invoice->id,
+                    'product_id' => $item['product_id'],
+                    'description' => $item['description'] ?? null,
+                    'qty' => $item['qty'],
+                    'unit_price' => $item['unit_price'],
+                    'discount_percent' => $item['discount_percent'] ?? 0,
+                    'tax_rate_id' => $item['tax_rate_id'] ?? null,
+                    'cgst_amt' => $cgst,
+                    'sgst_amt' => $sgst,
+                    'igst_amt' => $igst,
+                    'line_total' => $lineTotal,
+                ]);
+            }
+
+            // update invoice totals
+            $invoice->update([
+                'subtotal' => $subtotal,
+                'tax_total' => $taxTotal,
+                'grand_total' => $grandTotal,
+            ]);
+
+            return response()->json($invoice->load('items'), 201);
+        });
     }
+
 
 
     /**
