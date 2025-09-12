@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import API from "../api";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -15,10 +15,7 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const response = await axios.post("https://vyapar.srvtechservices.com/public/api/login", {
-        email,
-        password,
-      });
+      const response = await API.post("/login", { email, password });
 
       localStorage.setItem("token", response.data.token);
 

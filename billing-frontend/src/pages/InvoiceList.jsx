@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import API from "../api";
 
 export default function InvoiceList() {
   const [invoices, setInvoices] = useState([]);
@@ -7,7 +8,7 @@ export default function InvoiceList() {
 
   const fetchInvoices = async () => {
     try {
-      const res = await axios.get("/api/invoices");
+      const res = await API.get("/invoices"); 
       setInvoices(res.data);
     } catch (err) {
       console.error(err);
