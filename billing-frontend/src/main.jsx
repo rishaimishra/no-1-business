@@ -1,4 +1,3 @@
-// main.jsx
 import React from "react";
 import ReactDOM from "react-dom/client";
 import {
@@ -6,19 +5,31 @@ import {
   RouterProvider,
   Navigate,
 } from "react-router-dom";
-import Login from "./pages/Login";
-import Products from "./pages/Products";
 import "./index.css";
 
-function ProtectedRoute({ children }) {
-  const token = localStorage.getItem("token");
-  return token ? children : <Navigate to="/login" replace />;
-}
+import Login from "./pages/Login";
+import Products from "./pages/Products";
+import InvoiceList from "./pages/InvoiceList";
+import PaymentList from "./pages/PaymentList"; // future
+import Layout from "./components/Layout";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 const router = createBrowserRouter([
   { path: "/login", element: <Login /> },
-  { path: "/products", element: <ProtectedRoute><Products /></ProtectedRoute> },
-  { path: "*", element: <Navigate to="/products" replace /> },
+  {
+    path: "/",
+    element: (
+      <ProtectedRoute>
+        <Layout />
+      </ProtectedRoute>
+    ),
+    children: [
+      { path: "products", element: <Products /> },
+      { path: "invoices", element: <InvoiceList /> },
+      { path: "payments", element: <PaymentList /> }, // future
+      { path: "*", element: <Navigate to="/products" replace /> },
+    ],
+  },
 ]);
 
 ReactDOM.createRoot(document.getElementById("root")).render(
