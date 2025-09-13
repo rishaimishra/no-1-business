@@ -6,12 +6,22 @@ export default function Products({ setToken }) {
   const [products, setProducts] = useState([]);
   const [name, setName] = useState("");
   const [salePrice, setSalePrice] = useState("");
+  const [units, setUnits] = useState([]);
+  const [taxRates, setTaxRates] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [editingProduct, setEditingProduct] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'ascending' });
+  const [sku, setSku] = useState("");
+  const [unitId, setUnitId] = useState("");
+  const [hsnCode, setHsnCode] = useState("");
+  const [taxRateId, setTaxRateId] = useState("");
+  const [purchasePrice, setPurchasePrice] = useState("");
+  const [openingStock, setOpeningStock] = useState("");
+  const [minStock, setMinStock] = useState("");
+
   const navigate = useNavigate();
 
   // Filter products based on search term
@@ -19,10 +29,23 @@ export default function Products({ setToken }) {
     product.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const fetchUnitsAndTaxes = async () => {
+    try {
+      const [unitsRes, taxRes] = await Promise.all([
+        API.get("/units"),
+        API.get("/tax-rates"),
+      ]);
+      setUnits(unitsRes.data);
+      setTaxRates(taxRes.data);
+    } catch (err) {
+      console.error("Failed to fetch units/taxes", err);
+    }
+  };
+
   // Sort products
   const sortedProducts = [...filteredProducts].sort((a, b) => {
     if (!sortConfig.key) return 0;
-    
+
     if (a[sortConfig.key] < b[sortConfig.key]) {
       return sortConfig.direction === 'ascending' ? -1 : 1;
     }
@@ -66,29 +89,43 @@ export default function Products({ setToken }) {
       setError("Please fill all fields");
       return;
     }
-    
+
     try {
       if (editingProduct) {
         // Update existing product
-        await API.put(`/products/${editingProduct.id}`, { 
-          name, 
-          sale_price: salePrice 
+        await API.put(`/products/${editingProduct.id}`, {
+          name,
+          sku,
+          unit_id: unitId,
+          hsn_code: hsnCode,
+          tax_rate_id: taxRateId,
+          sale_price: salePrice,
+          purchase_price: purchasePrice,
+          opening_stock: openingStock,
+          min_stock: minStock
         });
         setSuccess("Product updated successfully!");
       } else {
         // Add new product
-        await API.post("/products", { 
-          name, 
-          sale_price: salePrice 
+        await API.post("/products", {
+          name,
+          sku,
+          unit_id: unitId,
+          hsn_code: hsnCode,
+          tax_rate_id: taxRateId,
+          sale_price: salePrice,
+          purchase_price: purchasePrice,
+          opening_stock: openingStock,
+          min_stock: minStock
         });
         setSuccess("Product added successfully!");
       }
-      
+
       setName("");
       setSalePrice("");
       setEditingProduct(null);
       fetchProducts();
-      
+
       // Clear success message after 3 seconds
       setTimeout(() => setSuccess(""), 3000);
     } catch (err) {
@@ -112,12 +149,12 @@ export default function Products({ setToken }) {
     if (!window.confirm("Are you sure you want to delete this product?")) {
       return;
     }
-    
+
     try {
       await API.delete(`/products/${productId}`);
       setSuccess("Product deleted successfully!");
       fetchProducts();
-      
+
       // Clear success message after 3 seconds
       setTimeout(() => setSuccess(""), 3000);
     } catch (err) {
@@ -141,7 +178,9 @@ export default function Products({ setToken }) {
 
   useEffect(() => {
     fetchProducts();
+    fetchUnitsAndTaxes();
   }, []);
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -207,53 +246,107 @@ export default function Products({ setToken }) {
             </h3>
             <form onSubmit={handleAdd} className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                  Product Name
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Product Name</label>
                 <input
                   type="text"
-                  id="name"
-                  placeholder="Enter product name"
-                  className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required
+                  className="w-full border px-3 py-2 rounded-md"
                 />
               </div>
+
               <div>
-                <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">
-                  Sale Price (₹)
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">SKU</label>
+                <input
+                  type="text"
+                  value={sku}
+                  onChange={(e) => setSku(e.target.value)}
+                  className="w-full border px-3 py-2 rounded-md"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Unit</label>
+                <select
+                  value={unitId}
+                  onChange={(e) => setUnitId(e.target.value)}
+                  required
+                  className="w-full border px-3 py-2 rounded-md"
+                >
+                  <option value="">Select Unit</option>
+                  {units.map((u) => (
+                    <option key={u.id} value={u.id}>{u.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">HSN Code</label>
+                <input
+                  type="text"
+                  value={hsnCode}
+                  onChange={(e) => setHsnCode(e.target.value)}
+                  className="w-full border px-3 py-2 rounded-md"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">GST</label>
+                <select
+                  value={taxRateId}
+                  onChange={(e) => setTaxRateId(e.target.value)}
+                  className="w-full border px-3 py-2 rounded-md"
+                >
+                  <option value="">Select GST</option>
+                  {taxRates.map((t) => (
+                    <option key={t.id} value={t.id}>{t.name} ({t.rate}%)</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Sale Price (₹)</label>
                 <input
                   type="number"
-                  id="price"
-                  placeholder="0.00"
-                  min="0"
-                  step="0.01"
-                  className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                   value={salePrice}
                   onChange={(e) => setSalePrice(e.target.value)}
                   required
+                  className="w-full border px-3 py-2 rounded-md"
                 />
               </div>
-              <div className="flex items-end space-x-2">
-                <button
-                  type="submit"
-                  className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                >
-                  {editingProduct ? 'Update Product' : 'Add Product'}
-                </button>
-                {editingProduct && (
-                  <button
-                    type="button"
-                    onClick={cancelEdit}
-                    className="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                  >
-                    Cancel
-                  </button>
-                )}
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Purchase Price (₹)</label>
+                <input
+                  type="number"
+                  value={purchasePrice}
+                  onChange={(e) => setPurchasePrice(e.target.value)}
+                  className="w-full border px-3 py-2 rounded-md"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Opening Stock</label>
+                <input
+                  type="number"
+                  value={openingStock}
+                  onChange={(e) => setOpeningStock(e.target.value)}
+                  className="w-full border px-3 py-2 rounded-md"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Min Stock</label>
+                <input
+                  type="number"
+                  value={minStock}
+                  onChange={(e) => setMinStock(e.target.value)}
+                  className="w-full border px-3 py-2 rounded-md"
+                />
               </div>
             </form>
+
           </div>
         </div>
 
@@ -318,22 +411,22 @@ export default function Products({ setToken }) {
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th 
-                        scope="col" 
+                      <th
+                        scope="col"
                         className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
                         onClick={() => requestSort('id')}
                       >
                         # {sortConfig.key === 'id' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
                       </th>
-                      <th 
-                        scope="col" 
+                      <th
+                        scope="col"
                         className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
                         onClick={() => requestSort('name')}
                       >
                         Name {sortConfig.key === 'name' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
                       </th>
-                      <th 
-                        scope="col" 
+                      <th
+                        scope="col"
                         className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
                         onClick={() => requestSort('sale_price')}
                       >

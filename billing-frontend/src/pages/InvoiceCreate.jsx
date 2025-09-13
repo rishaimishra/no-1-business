@@ -38,8 +38,23 @@ export default function InvoiceCreate() {
     const handleItemChange = (index, field, value) => {
         const updatedItems = [...items];
         updatedItems[index][field] = value;
+
+        // Agar product select hua hai to uska price set karo
+        if (field === "product_id") {
+            const selectedProduct = products.find(p => p.id == value);
+            if (selectedProduct) {
+                updatedItems[index].unit_price = selectedProduct.sale_price || 0;
+
+                // optional: default GST bhi auto set kar sakte ho
+                if (selectedProduct.tax_rate_id) {
+                    updatedItems[index].tax_rate_id = selectedProduct.tax_rate_id;
+                }
+            }
+        }
+
         setItems(updatedItems);
     };
+
 
     const addItem = () => {
         setItems([...items, { product_id: "", qty: 1, unit_price: 0, discount_percent: 0 }]);
