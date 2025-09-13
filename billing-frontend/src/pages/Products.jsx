@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import API from "../api";
+import ProductForm from "../components/ProductForm";
 import { useNavigate } from "react-router-dom";
 
 export default function Products({ setToken }) {
@@ -141,9 +142,18 @@ export default function Products({ setToken }) {
 
   const handleEdit = (product) => {
     setEditingProduct(product);
-    setName(product.name);
-    setSalePrice(product.sale_price);
+
+    setName(product.name || "");
+    setSalePrice(product.sale_price || "");
+    setSku(product.sku || "");
+    setUnitId(product.unit_id || "");
+    setHsnCode(product.hsn_code || "");
+    setTaxRateId(product.tax_rate_id || "");
+    setPurchasePrice(product.purchase_price || "");
+    setOpeningStock(product.opening_stock || "");
+    setMinStock(product.min_stock || "");
   };
+
 
   const handleDelete = async (productId) => {
     if (!window.confirm("Are you sure you want to delete this product?")) {
@@ -244,108 +254,15 @@ export default function Products({ setToken }) {
             <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
               {editingProduct ? 'Edit Product' : 'Add New Product'}
             </h3>
-            <form onSubmit={handleAdd} className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Product Name</label>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                  className="w-full border px-3 py-2 rounded-md"
-                />
-              </div>
+            <ProductForm
+              editingProduct={editingProduct}
+              onSuccess={() => {
+                setEditingProduct(null);
+                fetchProducts();
+              }}
+              onCancel={() => setEditingProduct(null)}
+            />
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">SKU</label>
-                <input
-                  type="text"
-                  value={sku}
-                  onChange={(e) => setSku(e.target.value)}
-                  className="w-full border px-3 py-2 rounded-md"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Unit</label>
-                <select
-                  value={unitId}
-                  onChange={(e) => setUnitId(e.target.value)}
-                  required
-                  className="w-full border px-3 py-2 rounded-md"
-                >
-                  <option value="">Select Unit</option>
-                  {units.map((u) => (
-                    <option key={u.id} value={u.id}>{u.name}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">HSN Code</label>
-                <input
-                  type="text"
-                  value={hsnCode}
-                  onChange={(e) => setHsnCode(e.target.value)}
-                  className="w-full border px-3 py-2 rounded-md"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">GST</label>
-                <select
-                  value={taxRateId}
-                  onChange={(e) => setTaxRateId(e.target.value)}
-                  className="w-full border px-3 py-2 rounded-md"
-                >
-                  <option value="">Select GST</option>
-                  {taxRates.map((t) => (
-                    <option key={t.id} value={t.id}>{t.name} ({t.rate}%)</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Sale Price (₹)</label>
-                <input
-                  type="number"
-                  value={salePrice}
-                  onChange={(e) => setSalePrice(e.target.value)}
-                  required
-                  className="w-full border px-3 py-2 rounded-md"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Purchase Price (₹)</label>
-                <input
-                  type="number"
-                  value={purchasePrice}
-                  onChange={(e) => setPurchasePrice(e.target.value)}
-                  className="w-full border px-3 py-2 rounded-md"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Opening Stock</label>
-                <input
-                  type="number"
-                  value={openingStock}
-                  onChange={(e) => setOpeningStock(e.target.value)}
-                  className="w-full border px-3 py-2 rounded-md"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Min Stock</label>
-                <input
-                  type="number"
-                  value={minStock}
-                  onChange={(e) => setMinStock(e.target.value)}
-                  className="w-full border px-3 py-2 rounded-md"
-                />
-              </div>
-            </form>
 
           </div>
         </div>
