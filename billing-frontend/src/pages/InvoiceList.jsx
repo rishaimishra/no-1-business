@@ -5,6 +5,7 @@ export default function InvoiceList() {
   const [invoices, setInvoices] = useState([]);
   const [pagination, setPagination] = useState({});
   const [loading, setLoading] = useState(true);
+  const [confirming, setConfirming] = useState(null);
 
   const fetchInvoices = async (page = 1) => {
     setLoading(true);
@@ -27,6 +28,20 @@ export default function InvoiceList() {
     fetchInvoices();
   }, []);
 
+  const handleConfirm = async (id) => {
+    if (!window.confirm("Are you sure you want to confirm this invoice?")) return;
+    setConfirming(id);
+    try {
+      await API.post(`/invoices/${id}/confirm`);
+      await fetchInvoices(pagination.current_page); // refresh list
+    } catch (err) {
+      console.error(err);
+      alert("Error confirming invoice!");
+    } finally {
+      setConfirming(null);
+    }
+  };
+
   const renderPagination = () => {
     if (!pagination.last_page || pagination.last_page === 1) return null;
 
@@ -37,7 +52,6 @@ export default function InvoiceList() {
 
     return (
       <div className="flex justify-center items-center mt-6 space-x-2">
-        {/* Previous */}
         <button
           disabled={pagination.current_page === 1}
           onClick={() => fetchInvoices(pagination.current_page - 1)}
@@ -49,8 +63,6 @@ export default function InvoiceList() {
         >
           Prev
         </button>
-
-        {/* Page Numbers */}
         {pages.map((page) => (
           <button
             key={page}
@@ -64,8 +76,6 @@ export default function InvoiceList() {
             {page}
           </button>
         ))}
-
-        {/* Next */}
         <button
           disabled={pagination.current_page === pagination.last_page}
           onClick={() => fetchInvoices(pagination.current_page + 1)}
@@ -107,7 +117,8 @@ export default function InvoiceList() {
                   <th className="px-4 py-2">Date</th>
                   <th className="px-4 py-2">Party</th>
                   <th className="px-4 py-2">Grand Total</th>
-                  <th className="px-4 py-2">Status</th>
+                  <th className="px-4 py-2">Payment Status</th>
+                  <th className="px-4 py-2">Invoice Status</th>
                   <th className="px-4 py-2">Actions</th>
                 </tr>
               </thead>
@@ -131,6 +142,17 @@ export default function InvoiceList() {
                         {inv.payment_status}
                       </span>
                     </td>
+                    <td className="px-4 py-2">
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs ${
+                          inv.status === "confirmed"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-gray-200 text-gray-800"
+                        }`}
+                      >
+                        {inv.status}
+                      </span>
+                    </td>
                     <td className="px-4 py-2 space-x-2">
                       <a
                         href={`/invoices/${inv.id}`}
@@ -144,6 +166,17 @@ export default function InvoiceList() {
                       >
                         Edit
                       </a>
+                      {inv.status === "draft" && (
+                        <button
+                          onClick={() => handleConfirm(inv.id)}
+                          disabled={confirming === inv.id}
+                          className="text-green-600 hover:underline"
+                        >
+                          {confirming === inv.id
+                            ? "Confirming..."
+                            : "Confirm"}
+                        </button>
+                      )}
                       <button
                         onClick={() => console.log("delete", inv.id)}
                         className="text-red-600 hover:underline"
@@ -156,8 +189,6 @@ export default function InvoiceList() {
               </tbody>
             </table>
           </div>
-
-          {/* Proper Pagination */}
           {renderPagination()}
         </>
       )}

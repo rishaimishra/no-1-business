@@ -23,6 +23,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('parties', PartyController::class);
     Route::apiResource('payments', PaymentController::class);
     Route::apiResource('units', UnitController::class);
+    Route::post('invoices/{invoice}/confirm', [InvoiceController::class, 'confirm']);
 
 
 

@@ -93,7 +93,7 @@ class InvoiceController extends Controller
                 if (!$taxRate) {
                     return response()->json(['error' => 'Invalid Tax Rate selected.'], 422);
                 }
-                
+
                 $taxPercent = $taxRate->rate;
 
                 // save item
@@ -121,6 +121,28 @@ class InvoiceController extends Controller
 
             return response()->json($invoice->load('items'), 201);
         });
+    }
+
+    public function confirm(Invoice $invoice)
+    {
+        $company = auth()->user()->company;
+        if ($invoice->company_id !== $company->id) {
+            abort(403);
+        }
+
+        if ($invoice->status !== 'draft') {
+            return response()->json(['error' => 'Already confirmed or cancelled.'], 422);
+        }
+
+        foreach ($invoice->items as $item) {
+            if ($item->product) {
+                $item->product->decrement('opening_stock', $item->qty);
+            }
+        }
+
+        $invoice->update(['status' => 'issued']);
+
+        return response()->json($invoice->load('items.product'));
     }
 
 
