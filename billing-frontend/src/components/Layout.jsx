@@ -16,6 +16,12 @@ export default function Layout() {
         <h2 className="text-lg font-bold mb-6">Billing App</h2>
         <nav className="flex-1 space-y-3">
           <Link
+            to="/units"
+            className="block px-3 py-2 rounded hover:bg-gray-200"
+          >
+            Units
+          </Link>
+          <Link
             to="/products"
             className="block px-3 py-2 rounded hover:bg-gray-200"
           >
