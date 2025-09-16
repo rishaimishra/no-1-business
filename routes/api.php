@@ -3,6 +3,7 @@
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\PartyController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\TaxRateController;
 use App\Http\Controllers\UnitController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -23,6 +24,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('parties', PartyController::class);
     Route::apiResource('payments', PaymentController::class);
     Route::apiResource('units', UnitController::class);
+    Route::apiResource('tax-rates', TaxRateController::class);
+
     Route::post('invoices/{invoice}/confirm', [InvoiceController::class, 'confirm']);
 
 

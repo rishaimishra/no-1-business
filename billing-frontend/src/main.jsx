@@ -11,6 +11,7 @@ import Login from "./pages/Login";
 import Products from "./pages/Products";
 import InvoiceList from "./pages/InvoiceList";
 import UnitList from "./pages/UnitList";
+import TaxRates from "./pages/TaxRates";
 import InvoiceCreate from "./pages/InvoiceCreate";
 
 import PaymentList from "./pages/PaymentList"; // future
@@ -32,6 +33,7 @@ const router = createBrowserRouter([
       { path: "invoices/create", element: <InvoiceCreate /> },
       { path: "payments", element: <PaymentList /> }, // future
       { path: "units", element: <UnitList /> }, // future
+      { path: "tax-rates", element: <TaxRates /> }, // future
       { path: "*", element: <Navigate to="/products" replace /> },
     ],
   },
