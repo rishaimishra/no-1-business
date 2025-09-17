@@ -22,6 +22,12 @@ export default function Layout() {
             Units
           </Link>
           <Link
+            to="/dashboard"
+            className="block px-3 py-2 rounded hover:bg-gray-200"
+          >
+            Dashboard
+          </Link>
+          <Link
             to="/tax-rates"
             className="block px-3 py-2 rounded hover:bg-gray-200"
           >

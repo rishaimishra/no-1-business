@@ -17,6 +17,7 @@ import InvoiceCreate from "./pages/InvoiceCreate";
 import PaymentList from "./pages/PaymentList"; // future
 import Layout from "./components/Layout";
 import ProtectedRoute from "./components/ProtectedRoute";
+import Dashboard from "./pages/Dashboard";
 
 const router = createBrowserRouter([
   { path: "/login", element: <Login /> },
@@ -34,6 +35,7 @@ const router = createBrowserRouter([
       { path: "payments", element: <PaymentList /> }, // future
       { path: "units", element: <UnitList /> }, // future
       { path: "tax-rates", element: <TaxRates /> }, // future
+      { path: "dashboard", element: <Dashboard /> }, // future
       { path: "*", element: <Navigate to="/products" replace /> },
     ],
   },

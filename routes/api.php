@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\PartyController;
 use App\Http\Controllers\PaymentController;
@@ -27,6 +28,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('tax-rates', TaxRateController::class);
 
     Route::post('invoices/{invoice}/confirm', [InvoiceController::class, 'confirm']);
+    Route::get('dashboard', [DashboardController::class, 'index']);
+
 
 
 
